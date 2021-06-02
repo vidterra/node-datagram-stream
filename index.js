@@ -63,7 +63,7 @@ function UdpStream (options, cb) {
 
     socket.on('error', startupErrorListener);
 
-    socket.bind(bindingPort, address);
+    socket.bind(bindingPort, multicast || address);
 
     socket.on('listening', function () {
         socket.removeListener('error', startupErrorListener);
@@ -71,7 +71,7 @@ function UdpStream (options, cb) {
         if (multicast) {
             //set up for multicast
             try {
-                socket.addMembership(multicast);
+                socket.addMembership(multicast, address);
                 socket.setMulticastTTL(multicastTTL);
                 socket.setMulticastLoopback(loopback ? true : false);
             }
