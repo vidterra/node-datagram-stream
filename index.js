@@ -17,6 +17,7 @@ function UdpStream (options, cb) {
     var destination     = unicast               || multicast || broadcast;
     var loopback        = options.loopback      || false;
     var reuseAddr       = (options.reuseAddr === false) ? false : true;
+    var recvBufferSize  = options.recvBufferSize || null;
     var socket;
 
     if (nodeVersion[0] === 0 && nodeVersion[1] < 12) {
@@ -63,9 +64,19 @@ function UdpStream (options, cb) {
 
     socket.on('error', startupErrorListener);
 
-    socket.bind(bindingPort, multicast || address);
+	if(multicast) {
+		if(process.platform === 'win32') {
+			socket.bind(bindingPort);
+		} else {
+			socket.bind(bindingPort, multicast);
+		}
 
-    socket.on('listening', function () {
+	} else {
+		socket.bind(bindingPort, address);
+	}
+
+
+	socket.on('listening', function () {
         socket.removeListener('error', startupErrorListener);
 
         if (multicast) {
@@ -74,6 +85,9 @@ function UdpStream (options, cb) {
                 socket.addMembership(multicast, address);
                 socket.setMulticastTTL(multicastTTL);
                 socket.setMulticastLoopback(loopback ? true : false);
+                if(recvBufferSize) {
+                    socket.setRecvBufferSize(recvBufferSize)
+                }
             }
             catch (err) {
                 socket.emit('error', err);
