@@ -65,7 +65,7 @@ function UdpStream (options, cb) {
     socket.on('error', startupErrorListener);
 
 	if(multicast) {
-		if(process.platform === 'win32') {
+		if(['win32', 'darwin'].includes(process.platform)) {
 			socket.bind(bindingPort);
 		} else {
 			socket.bind(bindingPort, multicast);
